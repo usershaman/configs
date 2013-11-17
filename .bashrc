@@ -153,7 +153,7 @@ extract()
           *.tgz)       tar xvzf $1    ;;
           *.zip)       unzip $1       ;;
           *.Z)         uncompress $1  ;;
-          *.7z)        7z x $1        ;;
+          *.7z)        p7zip -d $1        ;;
           *)           echo "don't know how to extract '$1'..." ;;
 	esac
     else
@@ -162,6 +162,7 @@ extract()
 }
 
 export EDITOR="emacs"
+export PAGER="/usr/bin/most -s"
 
 alias install='sudo aptitude install'
 alias update='sudo aptitude update'
@@ -169,9 +170,43 @@ alias upgrade='sudo aptitude upgrade'
 alias remove='sudo aptitude remove'
 alias purge='sudo aptitude purge'
 
-alias flux='/media/Files/Downloads/Programs/flux/xflux'
-alias emacs='TERM=xterm-256color emacs -nw'
+alias firefox='~/Downloads/Programs/firefox/firefox'
+# alias emacs='TERM=xterm-256color emacs -nw'
 alias reload="source ~/.bashrc"
+
+###### greeting                                                                                                   
+# from Jonathan's .bashrc file (by ~71KR117)                                                                    
+# get current hour (24 clock format i.e. 0-23)                                                                  
+hour=$(date +"%H")                                                                                              
+# if it is midnight to midafternoon will say G'morning                                                          
+if [ $hour -ge 0 -a $hour -lt 12 ]
+then                                                                                                            
+    greet="Good Morning, $USER. Welcome back."                                                                    
+    # if it is midafternoon to evening ( before 6 pm) will say G'noon                                               
+elif [ $hour -ge 12 -a $hour -lt 18 ];
+then                                                                                                            
+    greet="Good Afternoon, $USER. Welcome back."                                                                  
+else # it is good evening till midnight                                                                         
+    greet="Good Evening, $USER. Welcome back."                                                                    
+fi  
+
+function _expand()                                                                      
+{
+  [ "$cur" != "${cur%\\}" ] && cur="$cur\\";                    
+  if [[ "$cur" == \~*/* ]]; then                                                        
+    #eval cur=$cur;                                                                     
+      :;                                                                                
+  else                                                                                  
+    if [[ "$cur" == \~* ]]; then                                                        
+      cur=${cur#\~};                                                                   
+      COMPREPLY=($( compgen -P '~' -u $cur ));                                          
+      return ${#COMPREPLY[@]};                                                          
+    fi;                                                                                 
+  fi                                                                                    
+}
+
+# display greeting                                                                                              
+echo -e "${yellow}${greet}"      
 
 echo -ne "${yellow}Date:\t${yellow} $(date)"; echo ""
 echo -e "${yellow}Kernel:\t${yellow} $(uname -smr)"
